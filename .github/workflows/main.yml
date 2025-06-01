@@ -1,0 +1,119 @@
+name: Monorepo Delivery
+
+on:
+  push:
+    branches: ["main"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check and update nginx config
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/monorepo
+
+            if git diff --name-only HEAD^ HEAD | grep -q "nginx/"; then
+              echo "Nginx configuration has changed"
+              sudo cp ./.nginx/nginx.conf /etc/nginx/sites-available/default
+            fi
+
+      - name: Check Node.js & PM2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/monorepo
+
+            echo "Check Node.js"
+            if ! command -v node &> /dev/null; then
+            echo "Install Node.js"
+            curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            fi
+            
+            echo "Check PM2"
+            if ! command -v pm2 &> /dev/null; then
+            echo "Install PM2"
+            sudo npm install -g pm2
+            fi
+
+      - name: Update repository
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/monorepo
+            
+            git fetch origin
+            git checkout deploy || git checkout -b deploy origin/deploy
+            git pull origin deploy
+
+      - name: Install deps
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/monorepo
+
+            npm i
+
+      - name: Building app
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/monorepo
+            
+            npm run build
+
+      - name: Start Main
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/monorepo/apps/main
+
+            if pm2 list | grep -q "main"; then
+            pm2 reload main
+            else
+            pm2 start npm --name "main" -- start
+            fi
+            pm2 save
+
+      - name: Start Verona
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/monorepo/apps/verona
+
+            if pm2 list | grep -q "verona"; then
+            pm2 reload verona
+            else
+            pm2 start npm --name "verona" -- start
+            fi
+            pm2 save
