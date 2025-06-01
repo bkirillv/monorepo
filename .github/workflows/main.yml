@@ -18,9 +18,10 @@ jobs:
           script: |
             cd ~/monorepo
 
-            if git diff --name-only HEAD^ HEAD | grep -q "nginx/"; then
+            if ! sudo cmp -s "./.nginx/nginx.conf" "/etc/nginx/sites-available/default"; then
               echo "Nginx configuration has changed"
               sudo cp ./.nginx/nginx.conf /etc/nginx/sites-available/default
+              sudo systemctl reload nginx
             fi
 
       - name: Check Node.js & PM2
