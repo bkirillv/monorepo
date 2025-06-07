@@ -1,1 +1,1 @@
-export * from "./get-app-url";
+export * from "./get-subdomain-path";

@@ -1,5 +1,5 @@
-import { Button, Flex, Heading, Text } from "@radix-ui/themes";
-import { AppNames, getAppUrl } from "@repo/utils";
+import { Heading, Flex, Text, Button } from "@radix-ui/themes";
+import { getSubdomainPath } from "@repo/utils";
 
 export default function Home() {
   return (
@@ -7,7 +7,7 @@ export default function Home() {
       <Heading>Root repo</Heading>
       <Text>Available projects</Text>
       <Flex gap={"2"}>
-        <a href={getAppUrl(AppNames.verona)}>
+        <a href={getSubdomainPath("verona")}>
           <Button>Verona</Button>
         </a>
         <Button disabled={true}>CI/CD</Button>
