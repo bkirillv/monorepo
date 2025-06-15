@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+  main:
+    container_name: main
+    env_file:
+      - ".env"
+    build:
+      context: .
+      dockerfile: ./apps/main/Dockerfile
+    restart: always
+    ports:
+      - ${PORT_MAIN}:3000
+    networks:
+      - app_network
+  verona:
+    container_name: verona
+    env_file:
+      - ".env"
+    build:
+      context: .
+      dockerfile: ./apps/verona/Dockerfile
+    restart: always
+    ports:
+      - ${PORT_VERONA}:3000
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    external: true
