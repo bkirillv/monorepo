@@ -71,7 +71,7 @@ jobs:
           script: |
             cd ~/monorepo
 
-            npm i
+            yarn install
 
       - name: Building app
         uses: appleboy/ssh-action@master
@@ -83,7 +83,7 @@ jobs:
           script: |
             cd ~/monorepo
             
-            npm run build
+            yarn build
 
       - name: Start Main
         uses: appleboy/ssh-action@master
