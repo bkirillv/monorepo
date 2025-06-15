@@ -46,4 +46,4 @@ jobs:
           script: |
             cd ~/monorepo
             
-            docker-compose up --build --detach
+            docker compose up --build --detach
