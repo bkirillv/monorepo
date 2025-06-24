@@ -1,49 +1,49 @@
-name: Monorepo Delivery
-
-on:
-  push:
-    branches: ["main"]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check and update nginx config
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          port: 22
-          script: |
-            cd ~/monorepo
-
-            if ! sudo cmp -s "./.nginx/nginx.conf" "/etc/nginx/sites-available/default"; then
-              echo "Nginx configuration has changed"
-              sudo cp ./.nginx/nginx.conf /etc/nginx/sites-available/default
-              sudo systemctl reload nginx
-            fi
-
-      - name: Update repository
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          port: 22
-          script: |
-            cd ~/monorepo
-            
-            git pull origin main
-
-      - name: Update docker files
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          port: 22
-          script: |
-            cd ~/monorepo
-            
-            docker compose up --build --detach
+#name: Monorepo Delivery
+#
+#on:
+#  push:
+#    branches: ["main"]
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Check and update nginx config
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.HOST }}
+#          username: ${{ secrets.USERNAME }}
+#          key: ${{ secrets.PRIVATE_KEY }}
+#          port: 22
+#          script: |
+#            cd ~/monorepo
+#
+#            if ! sudo cmp -s "./.nginx/nginx.conf" "/etc/nginx/sites-available/default"; then
+#              echo "Nginx configuration has changed"
+#              sudo cp ./.nginx/nginx.conf /etc/nginx/sites-available/default
+#              sudo systemctl reload nginx
+#            fi
+#
+#      - name: Update repository
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.HOST }}
+#          username: ${{ secrets.USERNAME }}
+#          key: ${{ secrets.PRIVATE_KEY }}
+#          port: 22
+#          script: |
+#            cd ~/monorepo
+#
+#            git pull origin main
+#
+#      - name: Update docker files
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.HOST }}
+#          username: ${{ secrets.USERNAME }}
+#          key: ${{ secrets.PRIVATE_KEY }}
+#          port: 22
+#          script: |
+#            cd ~/monorepo
+#
+#            docker compose up --build --detach
